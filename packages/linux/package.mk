@@ -31,7 +31,7 @@ PKG_SHORTDESC="linux26: The Linux kernel 2.6 precompiled kernel binary image and
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 case "$LINUX" in
   amlogic)
-    PKG_VERSION="amlogic-3.10-16a1118"
+    PKG_VERSION="amlogic-3.10-ca65e57"
     PKG_URL="$DISTRO_SRC/$PKG_NAME-$PKG_VERSION.tar.xz"
     ;;
   imx6)
@@ -48,13 +48,9 @@ esac
 PKG_IS_ADDON="no"
 PKG_AUTORECONF="no"
 
-if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
-  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET mkbootimg:host"
-fi
-
 PKG_MAKE_OPTS_HOST="ARCH=$TARGET_ARCH headers_check"
 
-if [ "$BOOTLOADER" = "u-boot" -o "$LINUX" = "amlogic" ]; then
+if [ "$BOOTLOADER" = "u-boot" ]; then
   KERNEL_IMAGE="$KERNEL_UBOOT_TARGET"
 else
   KERNEL_IMAGE="bzImage"
@@ -65,9 +61,7 @@ if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
 fi
 
 post_patch() {
-  if [ -n "$DEVICE" -a -f $PROJECT_DIR/$PROJECT/devices/$DEVICE/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf ]; then
-    KERNEL_CFG_FILE=$PROJECT_DIR/$PROJECT/devices/$DEVICE/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf
-  elif [ -f $PROJECT_DIR/$PROJECT/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf ]; then
+  if [ -f $PROJECT_DIR/$PROJECT/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf ]; then
     KERNEL_CFG_FILE=$PROJECT_DIR/$PROJECT/$PKG_NAME/$PKG_NAME.$TARGET_ARCH.conf
   else
     KERNEL_CFG_FILE=$PKG_DIR/config/$PKG_NAME.$TARGET_ARCH.conf
@@ -80,7 +74,6 @@ post_patch() {
          $PKG_BUILD/Makefile
 
   cp $KERNEL_CFG_FILE $PKG_BUILD/.config
-  sed -i -e "s|^CONFIG_INITRAMFS_SOURCE=.*$|CONFIG_INITRAMFS_SOURCE=\"$ROOT/$BUILD/image/initramfs.cpio\"|" $PKG_BUILD/.config
   if [ ! "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
     sed -i -e "s|^CONFIG_INITRAMFS_SOURCE=.*$|CONFIG_INITRAMFS_SOURCE=\"$ROOT/$BUILD/image/initramfs.cpio\"|" $PKG_BUILD/.config
   fi
@@ -162,7 +155,7 @@ make_target() {
 }
 
 makeinstall_target() {
-  if [ "$BOOTLOADER" = "u-boot" -a -f "arch/arm/boot/dts/*.dtb" ]; then
+  if [ "$BOOTLOADER" = "u-boot" ]; then
     mkdir -p $INSTALL/usr/share/bootloader
     for dtb in arch/arm/boot/dts/*.dtb; do
       cp $dtb $INSTALL/usr/share/bootloader 2>/dev/null || :

@@ -17,7 +17,8 @@
 ################################################################################
 
 PKG_NAME="kodi"
-PKG_VERSION="16.0-Jarvis-a5f3a99"PKG_REV="1"
+PKG_VERSION="16.0-a5f3a99"
+PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
